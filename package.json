@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "react-router dev",
-    "build": "npm run typecheck && react-router build",
+    "build": "npm run typecheck && react-router build && node scripts/postbuild.mjs",
     "preview": "node scripts/preview.mjs",
     "typecheck": "react-router typegen && tsc"
   },
