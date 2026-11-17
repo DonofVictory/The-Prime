@@ -55,7 +55,11 @@ The devotional and affirmation of the day are the day of the month (1 to 31) in 
 
 ## Hosting
 
-Upload `build/client` to any static host (Vercel, Netlify, Cloudflare Pages). One setting matters: unknown URLs should serve `__spa-fallback.html` with a 404 status, so visitors see the site's "page does not exist" screen. For example, on Netlify add `public/_redirects` containing `/* /__spa-fallback.html 404`.
+Upload `build/client` to any static host (Vercel, Netlify, Cloudflare Pages). The build also writes `build/client/404.html` (a copy of `__spa-fallback.html`), which most static hosts serve with a 404 status for unknown URLs, so visitors see the site's "page does not exist" screen.
+
+**Vercel:** `vercel.json` already sets everything (output directory `build/client`, no framework preset), so the dashboard's Framework Preset and Output Directory settings are overridden. If the dashboard still shows "Vite", that is fine; `vercel.json` wins.
+
+**Netlify:** set the publish directory to `build/client`; it serves `404.html` automatically.
 
 ## Backend
 
