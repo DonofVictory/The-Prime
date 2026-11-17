@@ -26,15 +26,19 @@ export const site = {
     "A community for young people who want real faith, real conversations and real friendships.",
 
   /**
-   * Looping hero video on the home page. Put the files in public/video/ and set both paths, for example
-   * src: "/video/hero.mp4", poster: "/video/hero.jpg". Keep it muted-friendly, 8 to 15 seconds, about 2 to 4 MB.
+   * Looping hero video on the home page. Put the files in public/video/ and list them in `sources`, MP4 (H.264)
+   * first so iPhones can play it, then optionally WebM. Muted, 8 to 15 seconds, about 2 to 4 MB.
    * The poster is the still shown first, and the only thing shown on slow connections or with reduced motion.
    */
   // PLACEHOLDER: a generated stage-lights loop so the layout can be judged. Replace with real Prime footage.
   heroVideo: {
-    src: "/video/placeholder-hero.webm" as string | null,
+    sources: [
+      { src: "/video/placeholder-hero.mp4", type: "video/mp4" },
+      { src: "/video/placeholder-hero.webm", type: "video/webm" },
+    ] as { src: string; type: string }[],
     poster: "/video/placeholder-hero.jpg" as string | null,
   },
+
 
   address: "Hall 1, E-Center, 1-11 Commercial Avenue, Ozone Cinemas, Yaba, Lagos" as string | null,
   /** Google Maps link for "Get directions" */

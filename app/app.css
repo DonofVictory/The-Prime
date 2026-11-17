@@ -61,6 +61,14 @@
     overflow-x: clip;
   }
 
+  /* background videos never show the browser's own play button or controls (iOS draws one when autoplay waits) */
+  video.bg-video::-webkit-media-controls,
+  video.bg-video::-webkit-media-controls-start-playback-button,
+  video.bg-video::-webkit-media-controls-overlay-play-button {
+    display: none !important;
+    -webkit-appearance: none;
+  }
+
   /* Engraved guilloche lattice (scripts/make-patterns.mjs), barely visible, fixed behind everything */
   body::before {
     content: "";

@@ -284,15 +284,19 @@ function MomentVideo({ m, near, visible }: { m: Extract<Moment, { kind: "video" 
   useEffect(() => {
     const v = ref.current;
     if (!v) return;
+    // React only sets `muted` as a property; iPhones check the attribute before allowing autoplay
+    v.muted = !sound;
+    if (sound) v.removeAttribute("muted");
+    else v.setAttribute("muted", "");
     if (visible && !still) v.play().catch(() => {});
     else v.pause();
-  }, [visible, still, near]);
+  }, [visible, still, near, sound]);
 
   return (
     <div className="relative h-full w-full">
       <video
         ref={ref}
-        className="h-full w-full object-cover"
+        className={`h-full w-full object-cover ${still ? "" : "bg-video"}`}
         src={near || visible ? m.src : undefined}
         poster={m.poster}
         muted={!sound}
@@ -300,6 +304,7 @@ function MomentVideo({ m, near, visible }: { m: Extract<Moment, { kind: "video" 
         playsInline
         preload="none"
         aria-label={m.label}
+        disablePictureInPicture
         controls={still}
       />
       {!still && (
