@@ -1,0 +1,399 @@
+@import "tailwindcss";
+
+/*
+  Prime Church, "Night service" theme.
+  Taken from the logo: black ground, white mark, double parallel strokes.
+  One accent (sky) for actions and highlights. Red Hat Display for headings, Red Hat Text for reading.
+*/
+
+@theme {
+  /* onyx: a deep, slightly warm black, like lacquer rather than a screen's default dark mode */
+  --color-night: #0b0a09;
+  --color-surface: #141210;
+  --color-raise: #1c1a17;
+  --color-line: #2a2724;
+  --color-chalk: #f3f1ec;
+  --color-mute: #a7a299;
+  --color-sky: #8ec5ff;
+  --color-sky-strong: #b9dbff;
+  --color-punch: #ffd23f; /* comic pages only: the one loud colour */
+  --color-alert: #ff8070;
+  --color-alert-tint: #2a1513;
+
+  --font-display: "Red Hat Display Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Red Hat Text Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-comic: "Lilita One", "Red Hat Display Variable", ui-sans-serif, sans-serif;
+
+  /* modest type scale: 16px body */
+  --text-xs: 0.8125rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: clamp(1.75rem, 1.45rem + 1.2vw, 2.25rem);
+  --text-4xl: clamp(2.25rem, 1.8rem + 1.9vw, 3rem);
+  --text-5xl: clamp(2.5rem, 1.75rem + 3.2vw, 4rem);
+
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+    -webkit-text-size-adjust: 100%;
+    scroll-padding-top: 5rem;
+    /* same-page links (like "Plan your visit" jumping to the form) glide instead of jumping */
+    scroll-behavior: smooth;
+    background-color: var(--color-night);
+  }
+
+  body {
+    @apply relative font-sans text-base leading-relaxed text-chalk antialiased;
+  }
+
+  /*
+    Tilted comic cards waiting to rain in can poke past the side of the screen. Clipping on main (not body,
+    whose overflow passes to the whole window) stops sideways scrolling, and clip (unlike hidden) keeps
+    sticky sections working.
+  */
+  main {
+    overflow-x: clip;
+  }
+
+  /* Engraved guilloche lattice (scripts/make-patterns.mjs), barely visible, fixed behind everything */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -2;
+    pointer-events: none;
+    background-image: url("/patterns/lattice.svg");
+    background-size: 240px 48px;
+    opacity: 0.035;
+  }
+
+  /* Fine film grain so the black reads as a printed surface, not a flat screen */
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0.06;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.6 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  h1,
+  h2,
+  h3 {
+    @apply font-display font-bold tracking-tight text-balance;
+  }
+
+  p,
+  li {
+    text-wrap: pretty;
+  }
+
+  a {
+    @apply underline decoration-sky/60 decoration-2 underline-offset-4 hover:decoration-sky;
+  }
+
+  :focus-visible {
+    @apply rounded-sm outline-2 outline-offset-4 outline-sky;
+  }
+
+  [hidden] {
+    display: none !important;
+  }
+
+  ::selection {
+    @apply bg-sky text-night;
+  }
+
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="number"],
+  input[type="search"],
+  textarea,
+  select {
+    @apply w-full min-h-11 rounded-xl border border-line bg-night px-3.5 py-2.5 text-base text-chalk placeholder:text-mute focus-visible:border-sky focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-sky;
+  }
+
+  textarea {
+    @apply min-h-32 resize-y;
+  }
+
+  [aria-invalid="true"] {
+    @apply border-alert;
+  }
+}
+
+@layer components {
+  .wrap {
+    @apply mx-auto w-full max-w-6xl px-5 md:px-8;
+  }
+
+  /* the logo's two parallel strokes, used as a divider */
+  .double-rule {
+    @apply h-[5px] border-y border-line;
+  }
+
+  .btn {
+    @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-transparent px-5 py-2.5 font-display text-sm font-semibold whitespace-nowrap no-underline;
+  }
+  .btn-sky {
+    @apply bg-sky text-night hover:bg-sky-strong;
+  }
+  .btn-line {
+    @apply border-line bg-transparent text-chalk hover:border-chalk;
+  }
+  .btn-solid {
+    @apply bg-chalk text-night hover:bg-white;
+  }
+  .btn[disabled] {
+    @apply cursor-not-allowed opacity-60;
+  }
+
+  /* typewriter caret: a thin sky bar that blinks */
+  .caret {
+    @apply ml-[0.06em] inline-block h-[0.95em] w-[0.08em] min-w-[2px] bg-sky align-[-0.1em];
+    animation: caret-blink 1s steps(1) infinite;
+  }
+
+  .live-dot {
+    @apply size-2 shrink-0 rounded-full bg-[#ff4d4d];
+  }
+
+  /* text links that are actions, like "Plan your visit" in a row */
+  .text-action {
+    @apply font-display text-sm font-semibold text-sky;
+  }
+
+  /* placeholder token for details the church still has to add */
+  .ph {
+    @apply inline-block rounded-md border border-dashed border-mute/60 bg-raise px-1.5 text-[0.85em] leading-normal font-medium text-mute not-italic;
+  }
+
+  /* photo and video spots: real photos replace these */
+  .frame {
+    @apply relative flex items-end overflow-hidden rounded-2xl border border-dashed border-line bg-surface p-4 text-xs text-mute;
+  }
+
+  .verse {
+    @apply border-l-2 border-sky pl-4;
+  }
+  .verse p {
+    @apply font-sans text-lg leading-relaxed text-chalk italic;
+  }
+  .verse cite {
+    @apply mt-1.5 block text-sm font-medium text-mute not-italic;
+  }
+
+  .panel {
+    @apply rounded-2xl border border-line bg-surface p-5 md:p-7;
+  }
+
+  .notice {
+    @apply rounded-2xl border border-alert/50 bg-alert-tint p-4 text-sm leading-relaxed;
+  }
+  .notice strong {
+    @apply text-alert;
+  }
+
+  /* forms */
+  .form {
+    @apply grid gap-4;
+  }
+  .form-foot {
+    @apply flex flex-wrap items-center gap-x-4 gap-y-2;
+  }
+  .field {
+    @apply grid content-start gap-1.5;
+  }
+  .field > label,
+  .choices legend {
+    @apply text-sm font-semibold;
+  }
+  .hint {
+    @apply text-sm text-mute;
+  }
+  .optional {
+    @apply font-normal text-mute;
+  }
+  .field-error {
+    @apply text-sm font-medium text-alert empty:hidden;
+  }
+  .choices {
+    @apply m-0 min-w-0 border-0 p-0;
+  }
+  .choices legend {
+    @apply mb-2 p-0;
+  }
+  .chips {
+    @apply flex flex-wrap gap-2;
+  }
+  .chip {
+    @apply relative;
+  }
+  .chip input {
+    @apply absolute inset-0 m-0 cursor-pointer opacity-0;
+  }
+  .chip span {
+    @apply inline-flex min-h-11 cursor-pointer items-center rounded-full border border-line bg-night px-4 text-sm font-medium;
+  }
+  .chip input:hover + span {
+    @apply border-mute;
+  }
+  .chip input:checked + span {
+    @apply border-sky bg-sky text-night;
+  }
+  .chip input:focus-visible + span {
+    @apply outline-2 outline-offset-2 outline-sky;
+  }
+  .check {
+    @apply grid grid-cols-[auto_1fr] items-start gap-3 text-sm;
+  }
+  .check input {
+    @apply mt-0.5 size-5 accent-sky;
+  }
+  .form-alert {
+    @apply rounded-xl border border-alert/60 bg-alert-tint px-4 py-3 text-sm;
+  }
+  .demo-note {
+    @apply text-xs text-mute;
+  }
+  .success {
+    @apply px-4 py-8 text-center focus:outline-none;
+  }
+  .success h3 {
+    @apply mb-1 text-2xl;
+  }
+  .hp {
+    @apply absolute -left-[9999px] size-px overflow-hidden;
+  }
+}
+
+/*
+  Comic kit, used only on the playful pages (tribe quiz, events, Next Steps, 404).
+  Ink is chalk on the night background: thick outlines, solid offset shadows, no blur.
+*/
+@layer components {
+  .comic-title {
+    @apply font-comic font-normal tracking-normal text-chalk;
+    text-shadow: 0.03em 0.03em 0 color-mix(in oklab, var(--color-sky) 65%, transparent);
+  }
+
+  .ink {
+    @apply rounded-[1.1rem] border-[3px] border-chalk bg-surface;
+    box-shadow: 6px 6px 0 0 var(--color-chalk);
+  }
+  .ink-sky {
+    box-shadow: 6px 6px 0 0 var(--color-sky);
+  }
+  .ink-punch {
+    box-shadow: 6px 6px 0 0 var(--color-punch);
+  }
+
+  /* caption box: the yellow label stuck on a comic panel */
+  .caption {
+    @apply inline-block -rotate-2 rounded-md border-2 border-night bg-punch px-2.5 py-0.5 font-comic text-base leading-snug text-night;
+    box-shadow: 3px 3px 0 0 var(--color-night);
+  }
+
+  /* speech bubble with a tail at the bottom left */
+  .bubble {
+    @apply relative rounded-[1.4rem] border-[3px] border-chalk bg-chalk px-5 py-4 font-display font-bold text-night;
+  }
+  .bubble::after {
+    content: "";
+    position: absolute;
+    left: 2.2rem;
+    bottom: -1.05rem;
+    width: 1.6rem;
+    height: 1.1rem;
+    background: var(--color-chalk);
+    clip-path: polygon(0 0, 100% 0, 10% 100%);
+  }
+
+  /* the comic button: yellow, outlined, with a hard shadow that presses in */
+  .btn-comic {
+    @apply rounded-xl border-[3px] border-chalk bg-punch font-comic text-base font-normal text-night;
+    box-shadow: 4px 4px 0 0 var(--color-chalk);
+  }
+  .btn-comic:active {
+    transform: translate(3px, 3px);
+    box-shadow: 1px 1px 0 0 var(--color-chalk);
+  }
+  .btn-ink {
+    @apply rounded-xl border-[3px] border-chalk bg-night font-comic text-base font-normal text-chalk;
+    box-shadow: 4px 4px 0 0 var(--color-sky);
+  }
+  .btn-ink:active {
+    transform: translate(3px, 3px);
+    box-shadow: 1px 1px 0 0 var(--color-sky);
+  }
+
+  /*
+    Whole-page comic scope: wrap a page in .comic-page and the shared pieces (section headings, buttons,
+    panels, fields, choice chips) switch to the comic look, so forms and lists need no special versions.
+  */
+  .comic-page h2:not(.caption) {
+    @apply font-comic font-normal tracking-normal;
+    text-shadow: 0.03em 0.03em 0 color-mix(in oklab, var(--color-sky) 65%, transparent);
+  }
+  .comic-page .btn-sky {
+    @apply rounded-xl border-[3px] border-chalk bg-punch font-comic text-base font-normal text-night;
+    box-shadow: 4px 4px 0 0 var(--color-chalk);
+  }
+  .comic-page .btn-line {
+    @apply rounded-xl border-[3px] border-chalk bg-night font-comic text-base font-normal text-chalk;
+    box-shadow: 4px 4px 0 0 var(--color-sky);
+  }
+  .comic-page .btn-sky:active,
+  .comic-page .btn-line:active {
+    transform: translate(3px, 3px);
+    box-shadow: 1px 1px 0 0 var(--color-chalk);
+  }
+  .comic-page .panel {
+    @apply rounded-[1.1rem] border-[3px] border-chalk;
+    box-shadow: 6px 6px 0 0 var(--color-sky);
+  }
+  .comic-page .frame {
+    @apply border-2;
+  }
+  .comic-page input[type="text"],
+  .comic-page input[type="email"],
+  .comic-page input[type="tel"],
+  .comic-page input[type="number"],
+  .comic-page textarea,
+  .comic-page select {
+    @apply border-2 border-mute;
+  }
+  .comic-page .chip span {
+    @apply border-2 border-mute font-semibold;
+  }
+  .comic-page .chip input:checked + span {
+    @apply -rotate-1 border-chalk bg-punch text-night;
+    box-shadow: 3px 3px 0 0 var(--color-chalk);
+  }
+  .comic-page .check input {
+    accent-color: var(--color-punch);
+  }
+}
+
+@keyframes caret-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .caret {
+    animation: none;
+  }
+}
