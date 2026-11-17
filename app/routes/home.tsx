@@ -42,44 +42,69 @@ type Connection = { saveData?: boolean; effectiveType?: string };
  * and the hero is on screen. Otherwise it shows the still (poster), or the plain onyx until footage arrives.
  */
 function HeroBackdrop() {
-  const { src, poster } = site.heroVideo;
+  const { sources, poster } = site.heroVideo;
+  const hasVideo = sources.length > 0;
   const ref = useRef<HTMLDivElement>(null);
   const video = useRef<HTMLVideoElement>(null);
   const onScreen = useInView(ref, { amount: 0.1 });
   const still = useStill();
   const [allowed, setAllowed] = useState(false);
+  // the video stays invisible until frames are actually playing, so a phone never shows its play button
+  const [playing, setPlaying] = useState(false);
 
   useEffect(() => {
     const c = (navigator as Navigator & { connection?: Connection }).connection;
     const slow = !!c && (c.saveData === true || /(^|-)2g$/.test(c.effectiveType ?? ""));
-    setAllowed(!!src && !slow);
-  }, [src]);
+    setAllowed(hasVideo && !slow);
+  }, [hasVideo]);
 
   useEffect(() => {
     const v = video.current;
     if (!v) return;
-    if (onScreen) v.play().catch(() => {});
-    else v.pause();
+    // React only sets `muted` as a property; iPhones check the attribute before allowing autoplay
+    v.muted = true;
+    v.defaultMuted = true;
+    v.setAttribute("muted", "");
+    if (!onScreen) {
+      v.pause();
+      return;
+    }
+    const tryPlay = () => v.play().catch(() => {});
+    tryPlay();
+    // Low Power Mode and similar settings block autoplay until the visitor touches the page
+    const kick = () => tryPlay();
+    window.addEventListener("touchstart", kick, { once: true, passive: true });
+    window.addEventListener("scroll", kick, { once: true, passive: true });
+    return () => {
+      window.removeEventListener("touchstart", kick);
+      window.removeEventListener("scroll", kick);
+    };
   }, [onScreen, allowed]);
 
   return (
     <div ref={ref} className="absolute inset-0 -z-10" aria-hidden="true">
       {poster && <img src={poster} alt="" className="absolute inset-0 h-full w-full object-cover" />}
-      {src && allowed && !still && (
+      {hasVideo && allowed && !still && (
         <video
           ref={video}
-          className="absolute inset-0 h-full w-full object-cover"
-          src={src}
-          poster={poster ?? undefined}
+          className={`bg-video absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ${playing ? "opacity-100" : "opacity-0"}`}
           muted
           loop
           playsInline
           autoPlay
           preload="auto"
-        />
+          disablePictureInPicture
+          disableRemotePlayback
+          controls={false}
+          onPlaying={() => setPlaying(true)}
+        >
+          {sources.map((s) => (
+            <source key={s.src} src={s.src} type={s.type} />
+          ))}
+        </video>
       )}
-      {(src || poster) && <div className="absolute inset-0 bg-night/55" />}
-      {!src && (
+      {(hasVideo || poster) && <div className="absolute inset-0 bg-night/55" />}
+      {!hasVideo && (
         <p className="ph absolute right-5 bottom-4 hidden md:inline-block">[Hero video: 8 to 15 second muted loop]</p>
       )}
     </div>
